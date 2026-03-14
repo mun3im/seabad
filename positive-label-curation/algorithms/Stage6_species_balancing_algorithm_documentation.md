@@ -699,7 +699,7 @@ Post-balancing Gini: 0.652 (expected <0.55)
    - Measures peak-valley differences in spectrum for foreground detection
 
 6. **Spectral Centroid**
-   - Peeters, G. (2004). A large set of audio features for sound description (similarity and classification) in the CUIDADO project. *CUIDADO IST Project Report*, 54, 1-25.
+   - Oppenheim, Alan V & Schafer, Ronald W(1999). Discrete-Time Signal Processing, Prentice-Hall. 
    - "Brightness" descriptor for audio timbre
 
 7. **Mel-Frequency Spectrograms**
