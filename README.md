@@ -23,6 +23,7 @@ DATASET_ROOT = "/Volumes/Evo/SEABAD"
 FLAC_OUTPUT_DIR = "/Volumes/Evo/SEABAD/asean-flacs"
 POSITIVE_STAGING_DIR = "/Volumes/Evo/SEABAD/positive_staging"
 POSITIVE_FINAL_DIR = "/Volumes/Evo/SEABAD/positive"
+METADATA_DIR = "metadata"  # All CSV files and reports stored here
 ```
 
 **Run complete pipeline**:
@@ -100,7 +101,7 @@ python Stage1_xc_fetch_bird_metadata.py --country all
 python Stage1_xc_fetch_bird_metadata.py --country Malaysia
 ```
 
-**Output**: `Stage1out_xc_bird_metadata.csv` (~42,000 records)
+**Output**: `metadata/Stage1out_xc_bird_metadata.csv` (~42,000 records)
 
 **CSV Schema**:
 - `id` - Xeno-Canto recording ID
@@ -127,7 +128,7 @@ python Stage1_xc_fetch_bird_metadata.py --country Malaysia
 
 **Purpose**: Statistical analysis of metadata (species counts, distributions, quality ratings)
 
-**Input**: `Stage1out_xc_bird_metadata.csv` (from Stage 1)
+**Input**: `metadata/Stage1out_xc_bird_metadata.csv` (from Stage 1)
 
 **Output**: Console output only (no CSV)
 
@@ -151,7 +152,7 @@ python Stage2_analyze_metadata.py
 
 **Purpose**: Download MP3s from Xeno-Canto and convert to 16kHz mono FLAC
 
-**Input**: `Stage1out_xc_bird_metadata.csv` (from Stage 1)
+**Input**: `metadata/Stage1out_xc_bird_metadata.csv` (from Stage 1)
 
 **Configuration** (from `config.py`):
 - `TARGET_SAMPLE_RATE`: 16000 Hz
@@ -182,10 +183,10 @@ python Stage3_download_and_convert.py --limit 100
 4. Organize by species folders
 
 **Outputs**:
-- `Stage3out_successful_conversions.csv` (38,466 successful conversions)
-- `Stage3out_failed_downloads.csv` (4 failed downloads)
-- `Stage3_download_log.csv` (detailed log)
-- `Stage3_report.txt` (summary report)
+- `metadata/Stage3out_successful_conversions.csv` (38,466 successful conversions)
+- `metadata/Stage3out_failed_downloads.csv` (4 failed downloads)
+- `metadata/Stage3_download_log.csv` (detailed log)
+- `metadata/Stage3_report.txt` (summary report)
 - FLAC files in `FLAC_OUTPUT_DIR` organized by species
 
 **Filename format**: `xc{id}_{quality}.flac` (e.g., `xc422286_A.flac`)
@@ -209,7 +210,7 @@ python Stage3_download_and_convert.py --limit 100
 
 **Purpose**: Detect and quarantine duplicate/near-duplicate recordings using FAISS-accelerated acoustic similarity
 
-**Input**: `Stage3out_successful_conversions.csv` (from Stage 3)
+**Input**: `metadata/Stage3out_successful_conversions.csv` (from Stage 3)
 
 **FLAC Directory**: `FLAC_OUTPUT_DIR` from `config.py`
 
@@ -246,9 +247,9 @@ python Stage4_deduplicate_flac.py /custom/path/to/flacs
 - **Different recorders**: Keep older recording for manual review
 
 **Outputs**:
-- `Stage4out_unique_flacs.csv` (38,453 unique recordings)
-- `Stage4_removed_near_duplicates_metadata.csv` (13 removed entries)
-- `Stage4_report.txt` (detailed duplicate pairs)
+- `metadata/Stage4out_unique_flacs.csv` (38,453 unique recordings)
+- `metadata/Stage4_removed_near_duplicates_metadata.csv` (13 removed entries)
+- `metadata/Stage4_report.txt` (detailed duplicate pairs)
 
 **Expected Results**:
 - Perfect duplicates: 8 pairs (same recorder, metadata updates)
@@ -266,7 +267,7 @@ python Stage4_deduplicate_flac.py /custom/path/to/flacs
 
 **Purpose**: Extract fixed-length 3s clips with diversity-aware selection
 
-**Input**: `Stage4out_unique_flacs.csv` (from Stage 4)
+**Input**: `metadata/Stage4out_unique_flacs.csv` (from Stage 4)
 
 **Configuration** (from code defaults):
 - `WINDOW_SEC`: 3.0 seconds
@@ -316,7 +317,7 @@ python Stage5_extract_wav_from_flac.py --threshold 0.002 --no-quarantine
 - **RMS-filtered**: Select top N clips by RMS energy immediately
 
 **Outputs**:
-- `Stage5out_unique_3sclips.csv` (38,453 clips with metadata)
+- `metadata/Stage5out_unique_3sclips.csv` (38,453 clips with metadata)
 - WAV files in `POSITIVE_STAGING_DIR` (flat structure, no subdirectories)
 
 **CSV Additions** (extends Stage 4 metadata):
@@ -393,7 +394,7 @@ python Stage6_balance_species.py --clusters-per-species 8
 4. Save metadata CSV
 
 **Outputs**:
-- `Stage6out_balanced_clips.csv` (25,000 balanced clips)
+- `metadata/Stage6out_balanced_clips.csv` (25,000 balanced clips)
 - `species_balance.png` (pre/post distribution plot)
 - 25,000 WAV files moved to `POSITIVE_FINAL_DIR`
 
@@ -411,16 +412,18 @@ python Stage6_balance_species.py --clusters-per-species 8
 
 ## CSV Data Flow
 
+All CSV files and reports are stored in the `metadata/` directory.
+
 ```
-Stage 1: Stage1out_xc_bird_metadata.csv (42,000 records)
+Stage 1: metadata/Stage1out_xc_bird_metadata.csv (42,000 records)
            ├─> id, en, rec, cnt, lat, lon, file, lic, q, length, smp
            ↓
 Stage 2: (Analysis only, no CSV output)
            ↓
-Stage 3: Stage3out_successful_conversions.csv (38,466 conversions)
+Stage 3: metadata/Stage3out_successful_conversions.csv (38,466 conversions)
            ├─> Same as Stage1 + conversion metadata
            ↓
-Stage 4: Stage4out_unique_flacs.csv (38,453 unique, -13 duplicates)
+Stage 4: metadata/Stage4out_unique_flacs.csv (38,453 unique, -13 duplicates)
            ├─> Same as Stage3 (deduplicated)
            ↓
 Stage 5: Stage5out_unique_3sclips.csv (38,453 clips)
@@ -466,16 +469,17 @@ positive-label-curation/
 ├── Stage4_deduplicate_flac.py
 ├── Stage5_extract_wav_from_flac.py
 ├── Stage6_balance_species.py
-├── Stage1out_xc_bird_metadata.csv
-├── Stage3out_successful_conversions.csv
-├── Stage3out_failed_downloads.csv
-├── Stage3_download_log.csv
-├── Stage3_report.txt
-├── Stage4out_unique_flacs.csv
-├── Stage4_removed_near_duplicates_metadata.csv
-├── Stage4_report.txt
-├── Stage5out_unique_3sclips.csv
-├── Stage6out_balanced_clips.csv
+├── metadata/                            # All CSV files and reports
+│   ├── Stage1out_xc_bird_metadata.csv
+│   ├── Stage3out_successful_conversions.csv
+│   ├── Stage3out_failed_downloads.csv
+│   ├── Stage3_download_log.csv
+│   ├── Stage3_report.txt
+│   ├── Stage4out_unique_flacs.csv
+│   ├── Stage4_removed_near_duplicates_metadata.csv
+│   ├── Stage4_report.txt
+│   ├── Stage5out_unique_3sclips.csv
+│   └── Stage6out_balanced_clips.csv
 └── species_balance.png
 ```
 
@@ -537,7 +541,7 @@ positive-label-curation/
 **Issue**: Failed downloads with 404 or 500 errors
 
 **Solution**:
-- Check `Stage3out_failed_downloads.csv` for details
+- Check `metadata/Stage3out_failed_downloads.csv` for details
 - Xeno-Canto occasionally removes recordings or has server issues
 - 4 failed downloads out of 38,466 is expected (~0.01%)
 
@@ -594,11 +598,13 @@ POSITIVE_FINAL_DIR = os.path.join(DATASET_ROOT, "positive")
 
 ```python
 # Stage outputs automatically flow to next stage inputs
-STAGE1_OUTPUT_CSV = "Stage1out_xc_bird_metadata.csv"
-STAGE3_OUTPUT_CSV = "Stage3out_successful_conversions.csv"
-STAGE4_OUTPUT_CSV = "Stage4out_unique_flacs.csv"
-STAGE5_OUTPUT_CSV = "Stage5out_unique_3sclips.csv"
-STAGE6_OUTPUT_CSV = "Stage6out_balanced_clips.csv"
+# All CSV files stored in metadata/ directory
+METADATA_DIR = "metadata"
+STAGE1_OUTPUT_CSV = os.path.join(METADATA_DIR, "Stage1out_xc_bird_metadata.csv")
+STAGE3_OUTPUT_CSV = os.path.join(METADATA_DIR, "Stage3out_successful_conversions.csv")
+STAGE4_OUTPUT_CSV = os.path.join(METADATA_DIR, "Stage4out_unique_flacs.csv")
+STAGE5_OUTPUT_CSV = os.path.join(METADATA_DIR, "Stage5out_unique_3sclips.csv")
+STAGE6_OUTPUT_CSV = os.path.join(METADATA_DIR, "Stage6out_balanced_clips.csv")
 ```
 
 ### Audio Processing
@@ -658,14 +664,14 @@ WINDOW_SEC = 5.0  # 5-second clips instead of 3
 
 ### Species-Specific Dataset
 
-Filter `Stage1out_xc_bird_metadata.csv` before running Stage 3:
+Filter `metadata/Stage1out_xc_bird_metadata.csv` before running Stage 3:
 
 ```python
 import pandas as pd
 
-df = pd.read_csv('Stage1out_xc_bird_metadata.csv')
+df = pd.read_csv('metadata/Stage1out_xc_bird_metadata.csv')
 df_filtered = df[df['en'].isin(['Oriental Magpie-Robin', 'Common Tailorbird'])]
-df_filtered.to_csv('Stage1out_xc_bird_metadata.csv', index=False)
+df_filtered.to_csv('metadata/Stage1out_xc_bird_metadata.csv', index=False)
 ```
 
 ---
