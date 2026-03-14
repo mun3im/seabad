@@ -743,7 +743,7 @@ Post-balancing Gini: 0.652 (expected <0.55)
 ### Edge Deployment and Model Efficiency
 
 15. **TinyML for Bioacoustics**
-    - Kahl, S., Clapp, M., Hopping, W. A., et al. (2022). A collection of fully-annotated soundscape recordings from the Northeastern United States. *Scientific Data*, 9(1), 1-10.
+    - Kahl, S., Clapp, M., Hopping, W. A., et al. (2022). A collection of fully-annotated soundscape recordings from the Northeastern United States. *Zenodo*, doi = {10.5281/zenodo.7018484}.
     - Motivates dataset size reduction for edge deployment
 
 16. **Efficient Deep Learning**
