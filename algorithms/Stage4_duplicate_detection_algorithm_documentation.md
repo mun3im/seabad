@@ -437,3 +437,108 @@ A pair is a "perfect duplicate" iff:
 ```
 mean_sim ≥ 0.999 OR allclose(E₁, E₂, atol=1e-7)
 ```
+
+---
+
+## References
+
+### Core Technologies
+
+1. **FAISS (Facebook AI Similarity Search)**
+   - Johnson, J., Douze, M., & Jégou, H. (2019). Billion-scale similarity search with GPUs. *IEEE Transactions on Big Data*, 7(3), 535-547.
+   - https://github.com/facebookresearch/faiss
+   - Used for: Approximate nearest neighbor search, IndexFlatIP for exact inner product search
+
+2. **Mel-Frequency Spectrograms**
+   - Logan, B. (2000). Mel frequency cepstral coefficients for music modeling. *Proceedings of ISMIR*, 2000.
+   - McFee, B., Raffel, C., Liang, D., Ellis, D. P., McVicar, M., Battenberg, E., & Nieto, O. (2015). librosa: Audio and music signal analysis in Python. *Proceedings of the 14th Python in Science Conference*, 18-25.
+   - Used for: Audio feature extraction, time-frequency representation
+
+3. **Cosine Similarity for Audio Matching**
+   - Casey, M. A., Veltkamp, R., Goto, M., Leman, M., Rhodes, C., & Slaney, M. (2008). Content-based music information retrieval: Current directions and future challenges. *Proceedings of the IEEE*, 96(4), 668-696.
+   - Used for: Frame-wise embedding comparison
+
+### Audio Duplicate Detection Methods
+
+4. **Acoustic Fingerprinting**
+   - Wang, A. (2003). An industrial strength audio search algorithm. *Proceedings of ISMIR*, 2003, 7-13.
+   - Cano, P., Batlle, E., Kalker, T., & Haitsma, J. (2005). A review of audio fingerprinting. *Journal of VLSI Signal Processing Systems*, 41(3), 271-284.
+   - Inspiration for: Robust audio similarity detection
+
+5. **Near-Duplicate Detection in Large-Scale Datasets**
+   - Chum, O., Philbin, J., & Zisserman, A. (2008). Near duplicate image detection: min-hash and tf-idf weighting. *British Machine Vision Conference*, 3, 812-815.
+   - Jégou, H., Douze, M., & Schmid, C. (2008). Hamming embedding and weak geometric consistency for large scale image search. *European Conference on Computer Vision*, 304-317.
+   - Applied to: Audio duplicate detection using acoustic embeddings
+
+### Bioacoustic Dataset Curation
+
+6. **Quality Control in Bioacoustic Datasets**
+   - Stowell, D., Wood, M. D., Pamuła, H., Stylianou, Y., & Glotin, H. (2019). Automatic acoustic detection of birds through deep learning: The first Bird Audio Detection challenge. *Methods in Ecology and Evolution*, 10(3), 368-380.
+   - Kahl, S., Wood, C. M., Eibl, M., & Klinck, H. (2021). BirdNET: A deep learning solution for avian diversity monitoring. *Ecological Informatics*, 61, 101236.
+   - Context for: Dataset quality assurance and duplicate removal
+
+7. **Plagiarism Detection in User-Generated Content**
+   - Brin, S., Davis, J., & Garcia-Molina, H. (1995). Copy detection mechanisms for digital documents. *ACM SIGMOD Record*, 24(2), 398-409.
+   - Relevance: Detecting re-uploaded audio content from different users
+
+### Statistical Methods
+
+8. **Percentile-Based Robust Statistics**
+   - Rousseeuw, P. J., & Hubert, M. (2011). Robust statistics for outlier detection. *Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery*, 1(1), 73-79.
+   - Used for: 5th percentile similarity threshold to handle outlier frames
+
+9. **L2 Normalization for Similarity Metrics**
+   - Friedman, J. H., Bentley, J. L., & Finkel, R. A. (1977). An algorithm for finding best matches in logarithmic expected time. *ACM Transactions on Mathematical Software*, 3(3), 209-226.
+   - Applied to: Feature normalization before cosine similarity computation
+
+### Implementation Libraries
+
+10. **librosa**
+    - McFee, B., Raffel, C., Liang, D., Ellis, D. P., McVicar, M., Battenberg, E., & Nieto, O. (2015). librosa: Audio and music signal analysis in Python. *Proceedings of the 14th Python in Science Conference*, 18-25.
+    - https://librosa.org/
+    - Used for: Audio loading, mel-spectrogram computation, feature extraction
+
+11. **NumPy & SciPy**
+    - Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). Array programming with NumPy. *Nature*, 585(7825), 357-362.
+    - Virtanen, P., Gommers, R., Oliphant, T. E., et al. (2020). SciPy 1.0: Fundamental algorithms for scientific computing in Python. *Nature Methods*, 17(3), 261-272.
+    - Used for: Numerical operations, statistical computations
+
+### Dataset Context
+
+12. **Xeno-Canto**
+    - Vellinga, W. P., & Planqué, R. (2015). The Xeno-canto collection and its relation to sound recognition and classification. *CLEF (Working Notes)*, 1391, 1-8.
+    - Source: Primary data source for SEABAD pipeline
+
+13. **BirdCLEF and Bioacoustic Challenges**
+    - Joly, A., Goëau, H., Kahl, S., Deneu, B., Servajean, M., Cole, E., ... & Müller, H. (2018). Overview of LifeCLEF 2018: a large-scale evaluation of species identification and recommendation algorithms in the era of AI. *Experimental IR Meets Multilinguality, Multimodality, and Interaction*, 247-266.
+    - Context: Competition-driven dataset quality standards
+
+---
+
+## Citation
+
+If you use this duplicate detection algorithm in your research, please cite:
+
+```bibtex
+@misc{seabad2025stage4,
+  author = {Zabidi, M. M. A.},
+  title = {SEABAD Stage 4: FAISS-Accelerated Duplicate Detection for Bioacoustic Datasets},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/mun3im/seabad/tree/main/positive-label-curation}}
+}
+```
+
+And the SEABAD dataset:
+
+```bibtex
+@dataset{zabidi2025seabad,
+  author = {Zabidi, M. M. A.},
+  title = {SEABAD: Southeast Asian Bird Activity Detection Dataset},
+  year = {2025},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.17791820},
+  url = {https://doi.org/10.5281/zenodo.17791820}
+}
+```
