@@ -1,4 +1,4 @@
-# SEABAD Dataset Curation Pipeline
+# SEABAD Positive Sample Curation Pipeline
 
 A complete 6-stage pipeline for creating the **Southeast Asian Bird Audio Detection (SEABAD)** dataset from Xeno-Canto recordings. Produces a balanced, deduplicated dataset optimized for bird presence-absence detection on edge devices.
 
