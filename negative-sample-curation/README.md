@@ -1,4 +1,4 @@
-# Negative Sample Curation
+# SEABAD Negative Sample Curation Pipeline
 
 Pipeline for extracting high-quality negative (non-bird) audio samples for the SEABAD bird detection dataset. All outputs are 3-second mono clips at 16 kHz in WAV format.
 
