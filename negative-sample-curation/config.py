@@ -75,7 +75,7 @@ def extract_loudest_3s_clip(y: np.ndarray):
     """
     Find the loudest 3-second window in y using a 100 ms sliding hop.
 
-    Returns (clip, start_ms, reason):
+    Returns (clip, onset_ms, reason):
         success → (np.ndarray, int,  None)
         failure → (None,       None, reason_str)
     Rejection reasons: 'too_short', 'all_zero'
@@ -109,8 +109,8 @@ def extract_loudest_3s_clip(y: np.ndarray):
     if np.all(best_clip == 0):
         return None, None, 'all_zero'
 
-    start_ms = int(round(1000.0 * best_start / TARGET_SR))
-    return best_clip, start_ms, None
+    onset_ms = int(round(1000.0 * best_start / TARGET_SR))
+    return best_clip, onset_ms, None
 
 
 def extract_loudest_3s_or_pad(y: np.ndarray, filename_for_log: str = ""):
@@ -118,7 +118,7 @@ def extract_loudest_3s_or_pad(y: np.ndarray, filename_for_log: str = ""):
     Like extract_loudest_3s_clip but zero-pads files shorter than 3 s
     instead of rejecting them.
 
-    Returns (clip, start_ms, is_short):
+    Returns (clip, onset_ms, is_short):
         success  → (np.ndarray, int,  bool)   is_short=True when zero-padded
         failure  → (None,       None, False)
     """
@@ -184,11 +184,11 @@ def process_dcase_file(row_dict: dict, dataset_info: dict, output_dir):
             return False, 'missing_file', str(filepath)
 
         y, _ = librosa.load(str(filepath), sr=TARGET_SR, mono=True)
-        clip, start_ms, reason = extract_loudest_3s_clip(y)
+        clip, onset_ms, reason = extract_loudest_3s_clip(y)
         if clip is None:
             return False, reason, str(filepath)
 
-        out_filename = f"{dataset_info['subdir']}-{file_id}-{start_ms:05d}.wav"
+        out_filename = f"{dataset_info['subdir']}-{file_id}-{onset_ms:05d}.wav"
         out_path     = _Path(output_dir) / out_filename
         sf.write(str(out_path), clip, TARGET_SR)
         return True, None, str(out_path)

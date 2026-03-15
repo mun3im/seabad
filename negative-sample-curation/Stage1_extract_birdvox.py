@@ -4,7 +4,7 @@ Stage 1: Extract negative samples from BirdVox-DCASE-20k
 - Filters out files with bird sounds (hasbird == 1)
 - Extracts the loudest 3 s clip per file using a sliding window
 - Rejects files that are too short or all-zero
-- Output: negative/bv/bv-<itemid>-<start_ms:05d>.wav
+- Output: negative/bv/bv-<itemid>-<onset_ms:05d>.wav
 """
 
 import sys

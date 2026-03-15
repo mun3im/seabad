@@ -4,7 +4,7 @@ Stage 4: Extract negative samples from FSC22
 - Excludes bird classes: 23 (BirdChirping), 24 (WingFlapping)
 - Extracts the loudest 3 s clip per file using a sliding window
 - Low-amplitude clips are kept; only all-zero / missing / too-short are rejected
-- Output: negative/fsc/fsc-<name>-<start_ms:04d>.wav
+- Output: negative/fsc/fsc-<name>-<onset_ms:04d>.wav
 """
 
 import os
@@ -72,7 +72,7 @@ def main():
 
         try:
             y, _ = librosa.load(filepath, sr=TARGET_SR, mono=True)
-            clip, start_ms, reason = extract_loudest_3s_clip(y)
+            clip, onset_ms, reason = extract_loudest_3s_clip(y)
         except Exception as e:
             logger.error(f"Error loading {dataset_filename}: {e}")
             skip_counts['processing_error'] += 1
@@ -80,7 +80,7 @@ def main():
             continue
 
         if clip is not None:
-            valid_clips.append({'clip': clip, 'filename': dataset_filename, 'start_ms': start_ms})
+            valid_clips.append({'clip': clip, 'filename': dataset_filename, 'onset_ms': onset_ms})
         else:
             skip_counts[reason] += 1
             rejection_log.append((dataset_filename, reason))
@@ -91,7 +91,7 @@ def main():
     saved_count = 0
     for item in tqdm(valid_clips, desc="Saving clips"):
         base     = os.path.splitext(item['filename'])[0]
-        new_name = f"fsc-{base}-{item['start_ms']:04d}.wav"
+        new_name = f"fsc-{base}-{item['onset_ms']:04d}.wav"
         sf.write(os.path.join(STAGE4_NEG_DIR, new_name), item['clip'], TARGET_SR)
         saved_count += 1
 

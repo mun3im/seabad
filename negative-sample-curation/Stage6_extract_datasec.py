@@ -7,7 +7,7 @@ Stage 6: Extract negative samples from DataSEC
 - Group 4 (MUSIC):    Music
 - Target: exactly 3 597 samples
 - Short clips (<3 s) are zero-padded and used as filler
-- Output: negative/datasec/datasec-<folder>-<stem>-<start_ms:05d>.wav
+- Output: negative/datasec/datasec-<folder>-<stem>-<onset_ms:05d>.wav
 """
 
 import os
@@ -88,7 +88,7 @@ def main():
         for audio_file in tqdm(files, desc=f"Processing {folder}", unit="file"):
             try:
                 y, _ = librosa.load(audio_file, sr=TARGET_SR, mono=True)
-                clip, start_ms, is_short = extract_loudest_3s_or_pad(y, audio_file)
+                clip, onset_ms, is_short = extract_loudest_3s_or_pad(y, audio_file)
 
                 if clip is None:
                     rejected_count += 1
@@ -96,7 +96,7 @@ def main():
 
                 basename     = Path(audio_file).stem
                 folder_clean = folder.replace(' ', '_').replace('/', '_')
-                out_name     = f"datasec-{folder_clean}-{basename}-{start_ms:05d}.wav"
+                out_name     = f"datasec-{folder_clean}-{basename}-{onset_ms:05d}.wav"
                 if is_short:
                     out_name = out_name.replace(".wav", "_padded.wav")
 

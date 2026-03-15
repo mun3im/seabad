@@ -4,7 +4,7 @@ Stage 5: Extract negative samples from ESC-50
 - Excludes bird categories: rooster, hen, crow, chirping_birds
 - Extracts the loudest 3 s clip per file using a sliding window
 - Only rejects files that are all-zero, missing, or too short
-- Output: negative/esc/esc-<name>-<start_ms:04d>.wav
+- Output: negative/esc/esc-<name>-<onset_ms:04d>.wav
 """
 
 import os
@@ -74,7 +74,7 @@ def main():
 
         try:
             y, _ = librosa.load(src_path, sr=TARGET_SR, mono=True)
-            clip, start_ms, reason = extract_loudest_3s_clip(y)
+            clip, onset_ms, reason = extract_loudest_3s_clip(y)
         except Exception as e:
             logger.error(f"Error loading {filename}: {e}")
             skip_counts['processing_error'] += 1
@@ -83,7 +83,7 @@ def main():
 
         if clip is not None:
             valid_clips.append({'clip': clip, 'filename': filename,
-                                'category': row['category'], 'start_ms': start_ms})
+                                'category': row['category'], 'onset_ms': onset_ms})
         else:
             skip_counts[reason] += 1
             rejection_log.append((filename, row['category'], reason))
@@ -94,7 +94,7 @@ def main():
     saved_count = 0
     for item in tqdm(valid_clips, desc="Saving clips"):
         base     = os.path.splitext(item['filename'])[0]
-        new_name = f"esc-{base}-{item['start_ms']:04d}.wav"
+        new_name = f"esc-{base}-{item['onset_ms']:04d}.wav"
         sf.write(os.path.join(STAGE5_NEG_DIR, new_name), item['clip'], TARGET_SR)
         saved_count += 1
 

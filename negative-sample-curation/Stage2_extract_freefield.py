@@ -4,7 +4,7 @@ Stage 2: Extract negative samples from Freefield1010
 - Filters out files with bird sounds (hasbird == 1)
 - Extracts the loudest 3 s clip per file using a sliding window
 - Rejects files that are too short or all-zero
-- Output: negative/ff/ff-<itemid>-<start_ms:05d>.wav
+- Output: negative/ff/ff-<itemid>-<onset_ms:05d>.wav
 """
 
 import sys
