@@ -191,9 +191,22 @@ def review_clip(clip_filename: str, qa_rows: dict) -> bool:
 
     def _refresh_spans():
         s = state["start_s"]
-        verts = [[s, 0], [s, 1], [s + SEGMENT_SEC, 1], [s + SEGMENT_SEC, 0], [s, 0]]
-        sel_spec.set_xy(verts)
-        sel_wave.set_xy(verts)
+        # Update the vertices of the polygon patches
+        y_min_spec, y_max_spec = ax_spec.get_ylim()
+        y_min_wave, y_max_wave = ax_wave.get_ylim()
+
+        verts_spec = [[s, y_min_spec], [s, y_max_spec],
+                      [s + SEGMENT_SEC, y_max_spec], [s + SEGMENT_SEC, y_min_spec],
+                      [s, y_min_spec]]
+        verts_wave = [[s, y_min_wave], [s, y_max_wave],
+                      [s + SEGMENT_SEC, y_max_wave], [s + SEGMENT_SEC, y_min_wave],
+                      [s, y_min_wave]]
+
+        sel_spec.get_path().vertices[:, 0] = [v[0] for v in verts_spec]
+        sel_spec.get_path().vertices[:, 1] = [v[1] for v in verts_spec]
+        sel_wave.get_path().vertices[:, 0] = [v[0] for v in verts_wave]
+        sel_wave.get_path().vertices[:, 1] = [v[1] for v in verts_wave]
+
         fig.canvas.draw_idle()
 
     # ── Widgets ───────────────────────────────────────────────────────────────
