@@ -999,6 +999,9 @@ def main():
     script_start = time.perf_counter()
     args = parse_arguments()
 
+    # Ensure metadata directory exists
+    Path(config.METADATA_DIR).mkdir(parents=True, exist_ok=True)
+
     root = args.directory.resolve()
     if not root.is_dir():
         print(f"Error: {root} is not a directory", file=sys.stderr)

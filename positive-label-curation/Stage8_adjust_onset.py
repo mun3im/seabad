@@ -183,30 +183,23 @@ def review_clip(clip_filename: str, qa_rows: dict) -> bool:
     ax_wave.set_xlabel("Time (s)")
     ax_wave.set_xlim(0, duration)
 
-    # Draggable 3-second selection window
-    sel_spec = ax_spec.axvspan(state["start_s"], state["start_s"] + SEGMENT_SEC,
-                                alpha=0.30, color="deepskyblue", zorder=3)
-    sel_wave = ax_wave.axvspan(state["start_s"], state["start_s"] + SEGMENT_SEC,
-                                alpha=0.30, color="deepskyblue", zorder=3)
+    # Draggable 3-second selection window - store in list so we can replace
+    spans = {
+        "spec": ax_spec.axvspan(state["start_s"], state["start_s"] + SEGMENT_SEC,
+                                 alpha=0.30, color="deepskyblue", zorder=3),
+        "wave": ax_wave.axvspan(state["start_s"], state["start_s"] + SEGMENT_SEC,
+                                 alpha=0.30, color="deepskyblue", zorder=3)
+    }
 
     def _refresh_spans():
         s = state["start_s"]
-        # Update the vertices of the polygon patches
-        y_min_spec, y_max_spec = ax_spec.get_ylim()
-        y_min_wave, y_max_wave = ax_wave.get_ylim()
-
-        verts_spec = [[s, y_min_spec], [s, y_max_spec],
-                      [s + SEGMENT_SEC, y_max_spec], [s + SEGMENT_SEC, y_min_spec],
-                      [s, y_min_spec]]
-        verts_wave = [[s, y_min_wave], [s, y_max_wave],
-                      [s + SEGMENT_SEC, y_max_wave], [s + SEGMENT_SEC, y_min_wave],
-                      [s, y_min_wave]]
-
-        sel_spec.get_path().vertices[:, 0] = [v[0] for v in verts_spec]
-        sel_spec.get_path().vertices[:, 1] = [v[1] for v in verts_spec]
-        sel_wave.get_path().vertices[:, 0] = [v[0] for v in verts_wave]
-        sel_wave.get_path().vertices[:, 1] = [v[1] for v in verts_wave]
-
+        # Remove old spans and create new ones
+        spans["spec"].remove()
+        spans["wave"].remove()
+        spans["spec"] = ax_spec.axvspan(s, s + SEGMENT_SEC,
+                                         alpha=0.30, color="deepskyblue", zorder=3)
+        spans["wave"] = ax_wave.axvspan(s, s + SEGMENT_SEC,
+                                         alpha=0.30, color="deepskyblue", zorder=3)
         fig.canvas.draw_idle()
 
     # ── Widgets ───────────────────────────────────────────────────────────────
@@ -251,7 +244,7 @@ def review_clip(clip_filename: str, qa_rows: dict) -> bool:
     # ── Playback ──────────────────────────────────────────────────────────────
     prog_spec = ax_spec.axvline(0, color="red", linewidth=1.5, visible=False)
     prog_wave = ax_wave.axvline(0, color="red", linewidth=1.5, visible=False)
-    pb = {"on": False, "t0": None, "anim": None}
+    pb = {"on": False, "t0": None, "anim": None, "start_offset": 0.0}
 
     def _stop_pb():
         sd.stop()
@@ -268,23 +261,30 @@ def review_clip(clip_filename: str, qa_rows: dict) -> bool:
         if not pb["on"]:
             return []
         elapsed = time.time() - pb["t0"]
-        if elapsed >= duration:
+        if elapsed >= SEGMENT_SEC:
             _stop_pb()
             return []
+        current_time = pb["start_offset"] + elapsed
         for ln in (prog_spec, prog_wave):
-            ln.set_xdata([elapsed, elapsed])
+            ln.set_xdata([current_time, current_time])
         return [prog_spec, prog_wave]
 
     def toggle_play(event):
         if pb["on"]:
             _stop_pb()
         else:
-            sd.play(y, sr)
-            pb.update(on=True, t0=time.time())
+            # Extract and play only the 3-second segment
+            start_s = state["start_s"]
+            start_sample = int(start_s * sr)
+            end_sample = int((start_s + SEGMENT_SEC) * sr)
+            segment = y[start_sample:end_sample]
+
+            sd.play(segment, sr)
+            pb.update(on=True, t0=time.time(), start_offset=start_s)
             btn_play.label.set_text("Stop")
             for ln in (prog_spec, prog_wave):
                 ln.set_visible(True)
-                ln.set_xdata([0, 0])
+                ln.set_xdata([start_s, start_s])
             pb["anim"] = FuncAnimation(
                 fig, _tick, interval=50, blit=True, cache_frame_data=False
             )
@@ -364,6 +364,9 @@ def main():
              "Omit to open a file picker.",
     )
     args = parser.parse_args()
+
+    # Ensure metadata directory exists
+    os.makedirs(config.METADATA_DIR, exist_ok=True)
 
     qa_rows = _load_qa()
     app_state = _load_state()

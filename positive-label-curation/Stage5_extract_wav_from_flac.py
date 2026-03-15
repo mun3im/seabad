@@ -482,6 +482,9 @@ EXAMPLES:
                         help="Simulate processing without writing audio files")
     args = parser.parse_args()
 
+    # Ensure metadata directory exists
+    Path(config.METADATA_DIR).mkdir(parents=True, exist_ok=True)
+
     input_root = Path(args.inroot)
     output_root = Path(args.outroot)
     sr_out = int(args.sr)

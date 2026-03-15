@@ -192,6 +192,9 @@ def main() -> None:
     args = parser.parse_args()
     dry = args.dry_run
 
+    # Ensure metadata directory exists
+    os.makedirs(config.METADATA_DIR, exist_ok=True)
+
     if dry:
         log.info("DRY RUN — no files will be modified")
 

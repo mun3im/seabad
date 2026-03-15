@@ -209,6 +209,9 @@ EXAMPLES:
 
     args = parser.parse_args()
 
+    # Ensure metadata directory exists
+    os.makedirs(config.METADATA_DIR, exist_ok=True)
+
     api_key = os.environ.get("XENO_API_KEY")
     if not api_key:
         logger.error("No XENO_API_KEY found. Set environment variable XENO_API_KEY and retry.")

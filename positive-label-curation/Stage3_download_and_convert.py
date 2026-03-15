@@ -521,6 +521,8 @@ def main():
     logger.info(f"Input CSV: {STAGE3_INPUT_CSV}")
     logger.info(f"Target format: 16kHz mono FLAC")
 
+    # Ensure directories exist
+    ensure_dir(config.METADATA_DIR)
     ensure_dir(FLAC_OUTPUT_DIR)
     stats = process_csv_and_download(
         csv_path=STAGE3_INPUT_CSV,

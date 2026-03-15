@@ -528,6 +528,9 @@ EXAMPLES:
 
     args = parser.parse_args()
 
+    # Ensure metadata directory exists
+    Path(config.METADATA_DIR).mkdir(parents=True, exist_ok=True)
+
     csv_path = Path(args.input_csv)
     staging_dir = Path(args.staging_dir)
     final_dir = Path(args.final_dir)
