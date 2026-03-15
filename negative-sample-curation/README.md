@@ -169,6 +169,28 @@ Source datasets are expected at `/Volumes/Evo/datasets/`. To use different locat
   booktitle={ACM MM},
   year={2015}
 }
+
+@article{bandara2023forest,
+  title={Forest sound classification dataset: Fsc22},
+  author={Bandara, Meelan and Jayasundara, Roshinie and Ariyarathne, Isuru and Meedeniya, Dulani and Perera, Charith},
+  journal={Sensors},
+  volume={23},
+  number={4},
+  pages={2032},
+  year={2023},
+  publisher={MDPI}
+}
+
+@article{fredianelli2025environmental,
+  title={Environmental Noise Dataset for Sound Event Classification and Detection},
+  author={Fredianelli, Luca and Artuso, Francesco and Pompei, Geremia and Licitra, Gaetano and Iannace, Gino and Akbaba, Andac},
+  journal={Scientific Data},
+  volume={12},
+  number={1},
+  pages={1712},
+  year={2025},
+  publisher={Nature Publishing Group UK London}
+}
 ```
 
 ## Related
