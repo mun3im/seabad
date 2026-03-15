@@ -55,6 +55,15 @@ STAGE7_OUTPUT_DIR = os.path.join(DATASET_ROOT, "qa_thumbnails")  # QA output dir
 STAGE7_N_SAMPLES = 500  # Number of random clips to sample
 STAGE7_SEED = 42  # Random seed for reproducibility
 
+# Stage8: Adjust Onset (interactive QA tool for correcting clip onsets)
+STAGE8_QA_CSV = "qa_corrections.csv"  # QA corrections CSV
+STAGE8_STATE_FILE = ".stage8_state.json"  # State persistence file
+
+# Stage9: Apply QA Corrections (batch apply corrections from Stage8)
+STAGE9_QA_CSV = "qa_corrections.csv"  # Input: QA corrections from Stage8
+STAGE9_OUTPUT_CSV = "metadata/Stage9out_corrections_applied.csv"  # Output: action log
+STAGE9_REPORT_TXT = "metadata/Stage9_report.txt"  # Output: summary report
+
 # Audio conversion settings
 TARGET_SAMPLE_RATE = 16000  # 16kHz
 TARGET_CHANNELS = 1  # mono
