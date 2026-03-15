@@ -49,6 +49,12 @@ STAGE6_STAGING_DIR = POSITIVE_STAGING_DIR  # Read from staging
 STAGE6_FINAL_DIR = POSITIVE_FINAL_DIR  # Move to final positive dir
 STAGE6_MAX_CLIPS = 25000  # Default balanced dataset size
 
+# Stage7: QA Spectrograms (generates thumbnail sheets for manual review)
+STAGE7_SOURCE_DIR = POSITIVE_FINAL_DIR  # Read from final positive directory
+STAGE7_OUTPUT_DIR = os.path.join(DATASET_ROOT, "qa_thumbnails")  # QA output directory
+STAGE7_N_SAMPLES = 500  # Number of random clips to sample
+STAGE7_SEED = 42  # Random seed for reproducibility
+
 # Audio conversion settings
 TARGET_SAMPLE_RATE = 16000  # 16kHz
 TARGET_CHANNELS = 1  # mono
