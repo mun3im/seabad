@@ -503,8 +503,12 @@ EXAMPLES:
     # Load metadata lookup from Stage4 CSV if provided
     metadata_lookup = load_metadata_lookup(metadata_csv) if metadata_csv else {}
 
-    # Collect all species directories
-    species_dirs = [p for p in sorted(input_root.iterdir()) if p.is_dir()]
+    # Collect all species directories (exclude Stage4 quarantine folders)
+    QUARANTINE_DIRS = {"perfect duplicates", "near duplicates", "perfect_duplicates", "near_duplicates"}
+    species_dirs = [
+        p for p in sorted(input_root.iterdir())
+        if p.is_dir() and p.name not in QUARANTINE_DIRS
+    ]
     total_species = len(species_dirs)
 
     # Determine workflow
