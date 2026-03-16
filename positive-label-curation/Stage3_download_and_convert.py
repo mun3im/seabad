@@ -363,8 +363,11 @@ def process_csv_and_download(csv_path: str, out_root: str, dry_run: bool = False
             })
             continue
 
-        # quality char
-        q_char = q[0] if q else "U"
+        # quality char (convert "no score" to "U" for Unknown)
+        if not q or q.lower() in ("no score", "unrated", "unknown"):
+            q_char = "U"
+        else:
+            q_char = q[0].upper()
 
         # id canonical digits
         try:
