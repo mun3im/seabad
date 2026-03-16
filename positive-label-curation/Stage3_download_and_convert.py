@@ -455,9 +455,9 @@ def process_csv_and_download(csv_path: str, out_root: str, dry_run: bool = False
         conv_ok, conv_err = convert_to_flac(tmp_mp3, out_path_flac)
 
         if conv_ok:
-            # Validate actual FLAC duration (must be >= 3s)
+            # Validate actual FLAC duration (must be > 3.0s with 0.01s buffer for rounding)
             actual_duration = get_audio_duration(out_path_flac)
-            if actual_duration is not None and actual_duration < 3.0:
+            if actual_duration is not None and actual_duration < 3.01:
                 # FLAC is too short - remove it and log as failed
                 failed += 1
                 logger.warning(f"FLAC too short ({actual_duration:.2f}s < 3s): {out_path_flac} - removing")
