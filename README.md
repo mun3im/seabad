@@ -46,29 +46,7 @@ seabad/
 
 ## Curation Pipeline
 
-```
-                    ┌─────────────────────────────────────────┐
-                    │          POSITIVE LABELS                │
-                    │                                         │
-  Xeno-Canto API   │  S1 Fetch → S2 Analyse → S3 Download   │
-  (5 countries)    │  → S4 Deduplicate → S5 Extract clips    │
-                   │  → S6 Balance → S7 QA Spectrograms      │
-                   │  → S8 Adjust Onset → S9 Apply Fixes     │
-                   │                           25,000 WAVs   │
-                   └─────────────────────────────────────────┘
-
-                   ┌─────────────────────────────────────────┐
-                   │          NEGATIVE LABELS                │
-                   │                                         │
-  BirdVox          │  S1 BirdVox (9,983)                     │
-  Freefield1010    │  S2 Freefield (5,755)                   │
-  Warblrb10k       │  S3 Warblr (1,950)                      │
-  FSC-22           │  S4 FSC-22 (1,875)                      │
-  ESC-50           │  S5 ESC-50 (1,840)                      │
-  DataSEC          │  S6 DataSEC (3,597)                     │
-                   │                           25,000 WAVs   │
-                   └─────────────────────────────────────────┘
-```
+![Dataset curation pipeline](fig/mybad_curation.png)
 
 ### Positive pipeline highlights
 
