@@ -851,11 +851,13 @@ class FileCollector:
     """Collects audio files from directory structure."""
 
     @staticmethod
-    def collect(root: Path, recursive: bool) -> List[Path]:
+    def collect(root: Path, recursive: bool, metadata_manager=None) -> List[Path]:
         """
         Collect all .wav and .flac files.
         Default: root + immediate subfolders only
         --recursive: full recursion
+
+        If metadata_manager is provided, only include files with metadata entries.
         """
         pattern = "**/*" if recursive else "*"
         candidates = FileCollector._find_files(root, pattern)
@@ -863,6 +865,10 @@ class FileCollector:
         # Check one level deeper if nothing found and not recursive
         if not candidates and not recursive:
             candidates = FileCollector._check_subdirs(root)
+
+        # Filter by metadata if available
+        if metadata_manager:
+            candidates = FileCollector._filter_by_metadata(candidates, metadata_manager)
 
         return sorted(candidates)
 
@@ -882,6 +888,24 @@ class FileCollector:
             if subdir.is_dir():
                 candidates.extend(FileCollector._find_files(subdir, "*"))
         return candidates
+
+    @staticmethod
+    def _filter_by_metadata(filepaths: List[Path], metadata_manager) -> List[Path]:
+        """Filter files to only include those with metadata entries."""
+        filtered = []
+        skipped = 0
+
+        for filepath in filepaths:
+            xc_num = QuarantineManager.extract_xc_number(filepath)
+            if xc_num in metadata_manager.metadata_dict:
+                filtered.append(filepath)
+            else:
+                skipped += 1
+
+        if skipped > 0:
+            print(f"Skipped {skipped} file(s) without metadata entries (from previous runs)")
+
+        return filtered
 
 
 
@@ -1047,13 +1071,15 @@ def main():
         return
 
     # Collect files
-    filepaths = FileCollector.collect(root, args.recursive)
+    filepaths = FileCollector.collect(root, args.recursive, metadata_manager)
     if not filepaths:
         print("No WAV or FLAC files found (checked root + immediate subfolders).")
+        if metadata_manager:
+            print("Note: Files without metadata entries are automatically skipped.")
         print("Use --recursive if your files are nested deeper.")
         return
 
-    print(f"Found {len(filepaths)} audio files across subfolders.\n")
+    print(f"Found {len(filepaths)} audio files with metadata entries.\n")
 
     # Find duplicates
     finder = DuplicateFinder(filepaths, metadata_manager=metadata_manager)
