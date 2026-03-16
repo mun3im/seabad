@@ -412,6 +412,148 @@ python Stage6_balance_species.py --clusters-per-species 8
 
 ---
 
+### Stage 7: Generate QA Spectrograms (Optional)
+
+**Script**: `Stage7_qa_spectrograms.py`
+
+**Purpose**: Generate visual QA sheets for manual review of balanced clips
+
+**Input**: WAV files from `POSITIVE_FINAL_DIR` (Stage 6 output)
+
+**Configuration** (from `config.py`):
+- `STAGE7_N_SAMPLES`: 500 (number of random clips to sample)
+- `STAGE7_SEED`: 42 (random seed for reproducibility)
+- Layout: 5×5 spectrograms per page (25 clips per 4K screen)
+
+**Usage**:
+```bash
+# Default: 500 random samples
+python Stage7_qa_spectrograms.py
+
+# Custom sample size
+python Stage7_qa_spectrograms.py --n-samples 1000
+```
+
+**Outputs**:
+- `qa_thumbnails/page_001.png` through `page_020.png` (20 pages for 500 samples)
+- 3840×2160px PNG files optimized for 4K displays
+
+**Expected Results**:
+- 500 random clips sampled from 25,000 balanced dataset
+- 20 pages with 25 spectrograms each
+- Each thumbnail shows species folder + filename for context
+
+**Estimated Time**: 2-3 minutes
+
+---
+
+### Stage 8: Interactive Onset Adjustment (Optional)
+
+**Script**: `Stage8_adjust_onset.py`
+
+**Purpose**: Interactive tool to correct clip onset times identified during QA
+
+**Input**:
+- WAV files from `POSITIVE_FINAL_DIR`
+- FLAC files from `FLAC_OUTPUT_DIR` (for re-extraction)
+
+**Usage**:
+```bash
+# File picker mode (interactive loop)
+python Stage8_adjust_onset.py
+
+# Direct mode (single clip)
+python Stage8_adjust_onset.py xc422286_A_3000.wav
+```
+
+**Interface Features**:
+1. **Full spectrogram + waveform** of source FLAC
+2. **Draggable 3-second window** (blue overlay)
+3. **Original onset marker** (white dotted line)
+4. **Play button** - plays current 3s segment
+5. **Issue type selector**: wrong_onset | noise_dominated | no_bird
+6. **Manual onset input** (milliseconds)
+7. **Save/Skip buttons**
+
+**Outputs**:
+- `metadata/qa_corrections.csv` (corrections log for Stage 9)
+- `.stage8_state.json` (remembers last browse directory)
+
+**CSV Format**:
+```csv
+clip_filename,issue_type,corrected_onset_ms
+xc422286_A_3000.wav,wrong_onset,3500
+xc123456_B_12000.wav,noise_dominated,12300
+xc789012_A_0.wav,no_bird,
+```
+
+**Issue Types**:
+- `wrong_onset`: Onset needs correction (provides new onset_ms)
+- `noise_dominated`: Too noisy (optionally provides better onset, otherwise treated as no_bird)
+- `no_bird`: No bird vocalization present (removed, replacement attempted)
+
+**Expected Results** (Latest QA):
+- 22 clips reviewed
+- 21 onset corrections
+- 1 no_bird (with successful replacement)
+
+---
+
+### Stage 9: Apply QA Corrections (Optional)
+
+**Script**: `Stage9_qa_apply_corrections.py`
+
+**Purpose**: Batch apply corrections from Stage 8 QA review
+
+**Input**:
+- `metadata/qa_corrections.csv` (from Stage 8)
+- `metadata/Stage6out_balanced_clips.csv` (for onset tracking)
+- FLAC files from `FLAC_OUTPUT_DIR` (for re-extraction)
+
+**Usage**:
+```bash
+# Apply all corrections
+python Stage9_qa_apply_corrections.py
+
+# Preview without modifying files
+python Stage9_qa_apply_corrections.py --dry-run
+
+# Use custom QA CSV
+python Stage9_qa_apply_corrections.py --qa-csv custom_corrections.csv
+```
+
+**Processing Logic**:
+
+1. **wrong_onset**: Re-extract 3s clip at corrected onset, overwrite WAV
+2. **noise_dominated**:
+   - If corrected_onset_ms provided → same as wrong_onset
+   - If empty → treat as no_bird
+3. **no_bird**:
+   - Remove clip from POSITIVE_FINAL_DIR
+   - Attempt replacement from same FLAC (highest RMS, >= 1.5s from existing clips)
+   - If no replacement found → net count -1
+
+**Outputs**:
+- `metadata/Stage9out_corrections_applied.csv` (action log per clip)
+- `metadata/Stage9_report.txt` (summary report)
+- Updated WAV files in `POSITIVE_FINAL_DIR`
+
+**Expected Results** (Latest QA Run):
+```
+Total entries processed   : 22
+  wrong_onset corrected   : 21
+  no_bird / noise_dom.    : 1
+    → replaced            : 1
+    → removed (no repl.)  : 0
+  errors                  : 0
+
+Net clip count change     : +1
+```
+
+**Performance**: < 1 minute for typical QA batches
+
+---
+
 ## CSV Data Flow
 
 ```
@@ -420,17 +562,25 @@ Stage 1: Stage1out_xc_bird_metadata.csv (42,000 records)
            ↓
 Stage 2: (Analysis only, no CSV output)
            ↓
-Stage 3: Stage3out_successful_conversions.csv (38,466 conversions)
+Stage 3: Stage3out_successful_conversions.csv (38,494 conversions)
            ├─> Same as Stage1 + conversion metadata
            ↓
-Stage 4: Stage4out_unique_flacs.csv (38,453 unique, -13 duplicates)
+Stage 4: Stage4out_unique_flacs.csv (38,453 unique, -41 duplicates)
            ├─> Same as Stage3 (deduplicated)
            ↓
 Stage 5: Stage5out_unique_3sclips.csv (38,453 clips)
            ├─> All Stage4 fields + onset_ms, clip_filename
            ↓
 Stage 6: Stage6out_balanced_clips.csv (25,000 balanced)
-           └─> Same as Stage5 (balanced subset)
+           ├─> Same as Stage5 + quality_score, acoustic_salience, cluster_id
+           ↓
+Stage 7: (Optional QA visualization, no CSV output)
+           ↓
+Stage 8: qa_corrections.csv (QA corrections log)
+           ├─> clip_filename, issue_type, corrected_onset_ms
+           ↓
+Stage 9: Stage9out_corrections_applied.csv (correction actions)
+           └─> clip_filename, issue_type, result, new_filename, notes
 ```
 
 ---
