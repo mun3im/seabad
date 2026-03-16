@@ -227,6 +227,21 @@ def parse_length_to_seconds(length_str: str) -> float:
     return 0.0
 
 
+def get_audio_duration(file_path: str) -> Optional[float]:
+    """Get actual duration of audio file using ffprobe. Returns None if failed."""
+    try:
+        result = subprocess.run(
+            ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+             '-of', 'default=noprint_wrappers=1:nokey=1', file_path],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0:
+            return float(result.stdout.strip())
+    except Exception:
+        pass
+    return None
+
+
 def append_log_row(log_path: str, row: dict):
     """Append one row (dict) to download_log.csv; create header if missing."""
     ensure_dir(os.path.dirname(log_path) if os.path.dirname(log_path) else ".")
@@ -440,6 +455,30 @@ def process_csv_and_download(csv_path: str, out_root: str, dry_run: bool = False
         conv_ok, conv_err = convert_to_flac(tmp_mp3, out_path_flac)
 
         if conv_ok:
+            # Validate actual FLAC duration (must be >= 3s)
+            actual_duration = get_audio_duration(out_path_flac)
+            if actual_duration is not None and actual_duration < 3.0:
+                # FLAC is too short - remove it and log as failed
+                failed += 1
+                logger.warning(f"FLAC too short ({actual_duration:.2f}s < 3s): {out_path_flac} - removing")
+                try:
+                    os.remove(out_path_flac)
+                    os.remove(tmp_mp3)
+                except Exception as e:
+                    logger.warning(f"Could not delete files: {e}")
+
+                append_log_row(STAGE3_LOG_CSV, {
+                    "id": id_str, "en": en, "file_url": file_url, "q": q_char, "out_path": out_path_flac,
+                    "status": "too_short_actual", "error": f"actual_duration={actual_duration:.2f}s",
+                    "bytes": bytes_written, "elapsed_s": round(elapsed, 2), "ts": time.time()
+                })
+                append_failed_row(STAGE3_FAILED_CSV, {
+                    "id": id_str, "en": en, "file_url": file_url, "q": q_char, "out_path": out_path_flac,
+                    "error": f"too_short_actual_{actual_duration:.2f}s", "bytes": bytes_written,
+                    "elapsed_s": round(elapsed, 2), "ts": time.time()
+                })
+                continue
+
             # Successful conversion - delete the MP3
             try:
                 os.remove(tmp_mp3)
