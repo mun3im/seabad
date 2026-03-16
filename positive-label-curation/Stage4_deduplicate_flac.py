@@ -157,6 +157,7 @@ class DuplicateFinder:
 
     def compute_embeddings(self):
         print(f"\nComputing embeddings for {len(self.filepaths)} files...")
+        failed_files = []
 
         for fp in tqdm(self.filepaths, desc="Embedding", unit="file"):
             emb = AudioEmbedder.compute(fp)
@@ -164,11 +165,20 @@ class DuplicateFinder:
                 self.embeddings.append(emb)
                 self.clip_embeddings.append(self._to_clip_embedding(emb))
                 self.valid_paths.append(fp)
+            else:
+                failed_files.append(fp)
 
         self.clip_embeddings = np.vstack(self.clip_embeddings).astype("float32")
         faiss.normalize_L2(self.clip_embeddings)
 
         print(f"Embedded {len(self.valid_paths)}/{len(self.filepaths)} files successfully.")
+
+        if failed_files:
+            print(f"Failed to embed {len(failed_files)} file(s) (likely < 3s duration or corrupted):")
+            for fp in failed_files[:10]:
+                print(f"  - {fp.name}")
+            if len(failed_files) > 10:
+                print(f"  ... and {len(failed_files) - 10} more")
 
     @staticmethod
     def _to_clip_embedding(emb: np.ndarray) -> np.ndarray:

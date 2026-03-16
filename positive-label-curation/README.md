@@ -246,17 +246,20 @@ python Stage4_deduplicate_flac.py /custom/path/to/flacs
 - **Different recorders**: Keep older recording for manual review
 
 **Outputs**:
-- `Stage4out_unique_flacs.csv` (38,453 unique recordings)
-- `Stage4_removed_near_duplicates_metadata.csv` (13 removed entries)
-- `Stage4_report.txt` (detailed duplicate pairs)
+- `metadata/Stage4out_unique_flacs.csv` (38,453 unique recordings)
+- `metadata/Stage4_removed_near_duplicates_metadata.csv` (13 removed entries)
+- `metadata/Stage4_report.txt` (detailed duplicate pairs)
 
-**Expected Results**:
-- Perfect duplicates: 8 pairs (same recorder, metadata updates)
-- Near-duplicates: 5 pairs (for manual review)
+**Expected Results** (Latest Run):
+- Input: 38,506 FLAC files
+- Successfully embedded: 38,494 files (12 files < 3s duration or corrupted)
+- Perfect duplicates detected: 8 pairs (same recorder, metadata updates)
+- Near-duplicates detected: 5 pairs (different recorders, for manual review)
+- Candidate pairs skipped: 92,774 (different source durations → not duplicates)
 - Total removed: 13 files (0.03% of corpus)
 - Final corpus: 38,453 unique recordings
 
-**Performance**: 15-30 minutes (FAISS-accelerated, 10-100x faster than all-pairs)
+**Performance**: ~6 minutes for 38,506 files (FAISS-accelerated, 10-100x faster than all-pairs)
 
 ---
 
