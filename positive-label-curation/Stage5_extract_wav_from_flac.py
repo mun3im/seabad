@@ -396,6 +396,21 @@ def select_top_clips_by_rms(csv_path: Path, output_root: Path, max_clips: int = 
         print(f"Final clip count: {total_clips:,}")
         return
 
+    # Check if rms_energy column exists
+    if "rms_energy" not in df.columns:
+        print("\n" + "="*60)
+        print("ERROR: CSV missing 'rms_energy' column")
+        print("="*60)
+        print("The RMS-only workflow requires the 'rms_energy' column.")
+        print("This column is only computed when using --no-quarantine flag.")
+        print("\nTo fix this issue:")
+        print("  1. Delete the current Stage5 CSV and output directory")
+        print("  2. Re-run with --no-quarantine flag:")
+        print("     python Stage5_extract_wav_from_flac.py --no-quarantine")
+        print("\nAlternatively, if you want RMS-only workflow, the CSV")
+        print("generation logic needs to be updated to include RMS values.")
+        sys.exit(1)
+
     # Sort by RMS descending
     df = df.sort_values(by="rms_energy", ascending=False).reset_index(drop=True)
 
