@@ -891,19 +891,47 @@ class FileCollector:
 
     @staticmethod
     def _filter_by_metadata(filepaths: List[Path], metadata_manager) -> List[Path]:
-        """Filter files to only include those with metadata entries."""
+        """Filter files to only include those with matching metadata entries (ID + quality)."""
+        import re
         filtered = []
-        skipped = 0
+        skipped_no_metadata = 0
+        skipped_wrong_quality = 0
+
+        # Pattern to extract xc{id}_{quality}.flac
+        filename_pattern = re.compile(r'xc(\d+)_([A-Ea-eUun])\.flac')
 
         for filepath in filepaths:
-            xc_num = QuarantineManager.extract_xc_number(filepath)
-            if xc_num in metadata_manager.metadata_dict:
+            # Extract XC ID and quality from filename
+            match = filename_pattern.match(filepath.name)
+            if not match:
+                skipped_no_metadata += 1
+                continue
+
+            xc_num = int(match.group(1))
+            file_quality = match.group(2).upper()
+
+            # Check if ID exists in metadata
+            if xc_num not in metadata_manager.metadata_dict:
+                skipped_no_metadata += 1
+                continue
+
+            # Check if quality matches metadata
+            metadata_quality = metadata_manager.metadata_dict[xc_num].get('q', '').upper()
+            # Normalize 'n' to 'U' for comparison (handles old files)
+            if metadata_quality == 'N' or metadata_quality == 'NO SCORE':
+                metadata_quality = 'U'
+            if file_quality == 'N':
+                file_quality = 'U'
+
+            if file_quality == metadata_quality:
                 filtered.append(filepath)
             else:
-                skipped += 1
+                skipped_wrong_quality += 1
 
-        if skipped > 0:
-            print(f"Skipped {skipped} file(s) without metadata entries (from previous runs)")
+        total_skipped = skipped_no_metadata + skipped_wrong_quality
+        if total_skipped > 0:
+            print(f"Skipped {total_skipped} file(s): {skipped_no_metadata} without metadata, "
+                  f"{skipped_wrong_quality} with mismatched quality (from previous runs)")
 
         return filtered
 
