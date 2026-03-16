@@ -35,7 +35,7 @@ OUTPUT_DIR  = config.STAGE7_OUTPUT_DIR
 N_SAMPLES   = config.STAGE7_N_SAMPLES
 SEED        = config.STAGE7_SEED
 
-COLS, ROWS  = 5, 8          # 40 per page
+COLS, ROWS  = 5, 5          # 25 per page
 DPI         = 100
 FIG_W       = 3840 / DPI    # 38.4 in  → 3840 px wide
 FIG_H       = 2160 / DPI    # 21.6 in  → 2160 px tall
