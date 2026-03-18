@@ -23,7 +23,7 @@ All plotting functions follow this signature:
 Parameters:
     history: tf.keras.callbacks.History or np.ndarray - Training history or true labels
     preds: np.ndarray - Predicted probabilities (for non-history plots)
-    title: str - Plot title (e.g., 'mybad_Training_History')
+    title: str - Plot title (e.g., 'seabad_Training_History')
     stage: int - Training stage identifier (e.g., 1 for first stage)
     results_dir: str - Directory to save plot files
 """
