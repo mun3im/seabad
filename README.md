@@ -3,6 +3,7 @@
 A dataset of **50,000 automatically curated 3-second clips** spanning more than **1,600 Southeast Asian bird species**, standardised to 16 kHz mono for binary bird presence–absence detection on edge devices.
 
 > **Dataset**: [zenodo.org/records/18290494](https://zenodo.org/records/18290494)
+
 > **Paper**: *SEABAD: A Tropical Bird Audio Detection Dataset for Passive Acoustic Monitoring* (preprint)
 
 ---
